@@ -10,6 +10,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 setup(
     name="isolator",
     version=version,
+    url="https://github.com/neuneck/isolator",
     license="mit",
     description="Isolate a python class into a separate process",
     long_description=long_description,
