@@ -121,15 +121,15 @@ class Isolator(Process):
                 f"An attribute of name '{func_name}' already exists")
 
         def wrapped(*args, **kwargs):
-            if not self.__is_processing:
-                try:
-                    self.__is_processing = True
-                    self.in_queue.put_nowait((func_name, args, kwargs))
-                    return self.out_queue.get()
-                finally:
-                    self.__is_processing = False
-            else:
+            # Could not get it to work with Lock.aquire(block=False)
+            if self.__is_processing:
                 raise AlreadyProcessing
+            try:
+                self.__is_processing = True
+                self.in_queue.put_nowait((func_name, args, kwargs))
+                return self.out_queue.get()
+            finally:
+                self.__is_processing = False
 
         setattr(self, func_name, wrapped)
 
