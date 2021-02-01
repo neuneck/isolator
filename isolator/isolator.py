@@ -127,7 +127,11 @@ class Isolator(Process):
             try:
                 self.__is_processing = True
                 self.in_queue.put_nowait((func_name, args, kwargs))
-                return self.out_queue.get()
+                result = self.out_queue.get()
+                if isinstance(result, Exception):
+                    raise result
+                else:
+                    return result
             finally:
                 self.__is_processing = False
 
@@ -144,8 +148,8 @@ class Isolator(Process):
         for dispatch, args, kwargs in iter(self.in_queue.get, "STOP"):
             try:
                 result = getattr(self.model, dispatch)(*args, **kwargs)
-            except KeyError:
-                raise RuntimeError(f"Unknown dispatch '{dispatch}'")
+            except Exception as e:
+                result = e
 
             self.out_queue.put(result, block=True)
 
